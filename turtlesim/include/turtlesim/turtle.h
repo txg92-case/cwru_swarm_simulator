@@ -27,20 +27,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TURTLESIM_TURTLE_H
-#define TURTLESIM_TURTLE_H
+#ifndef swarm_sim_TURTLE_H
+#define swarm_sim_TURTLE_H
 
 // This prevents a MOC error with versions of boost >= 1.48
 #ifndef Q_MOC_RUN  // See: https://bugreports.qt-project.org/browse/QTBUG-22829
 # include <ros/ros.h>
 # include <boost/shared_ptr.hpp>
 
-# include <turtlesim/Pose.h>
+# include <swarm_sim/Pose.h>
 # include <geometry_msgs/Twist.h>
-# include <turtlesim/SetPen.h>
-# include <turtlesim/TeleportRelative.h>
-# include <turtlesim/TeleportAbsolute.h>
-# include <turtlesim/Color.h>
+# include <swarm_sim/SetPen.h>
+# include <swarm_sim/TeleportRelative.h>
+# include <swarm_sim/TeleportAbsolute.h>
+# include <swarm_sim/Color.h>
 #endif
 
 #include <QImage>
@@ -50,7 +50,7 @@
 
 #define PI 3.14159265
 
-namespace turtlesim
+namespace swarm_sim
 {
 
 class Turtle
@@ -60,11 +60,14 @@ public:
 
   bool update(double dt, QPainter& path_painter, const QImage& path_image, qreal canvas_width, qreal canvas_height);
   void paint(QPainter &painter);
+
+  void setEvil(bool evil, const QImage& turtle_image);
+
 private:
   void velocityCallback(const geometry_msgs::Twist::ConstPtr& vel);
-  bool setPenCallback(turtlesim::SetPen::Request&, turtlesim::SetPen::Response&);
-  bool teleportRelativeCallback(turtlesim::TeleportRelative::Request&, turtlesim::TeleportRelative::Response&);
-  bool teleportAbsoluteCallback(turtlesim::TeleportAbsolute::Request&, turtlesim::TeleportAbsolute::Response&);
+  bool setPenCallback(swarm_sim::SetPen::Request&, swarm_sim::SetPen::Response&);
+  bool teleportRelativeCallback(swarm_sim::TeleportRelative::Request&, swarm_sim::TeleportRelative::Response&);
+  bool teleportAbsoluteCallback(swarm_sim::TeleportAbsolute::Request&, swarm_sim::TeleportAbsolute::Response&);
 
   void rotateImage();
 
@@ -74,6 +77,7 @@ private:
   QImage turtle_rotated_image_;
 
   QPointF pos_;
+  bool evil_;
   qreal orient_;
 
   qreal lin_vel_;

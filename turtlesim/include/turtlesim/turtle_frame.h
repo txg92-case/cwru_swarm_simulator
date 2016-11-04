@@ -39,14 +39,16 @@
 # include <ros/ros.h>
 
 # include <std_srvs/Empty.h>
-# include <turtlesim/Spawn.h>
-# include <turtlesim/Kill.h>
+# include <swarm_sim/Spawn.h>
+# include <swarm_sim/Kill.h>
+# include <swarm_sim/Betray.h>
+# include <swarm_sim/SwarmList.h>
 # include <map>
 
 # include "turtle.h"
 #endif
 
-namespace turtlesim
+namespace swarm_sim
 {
 
 class TurtleFrame : public QFrame
@@ -72,8 +74,10 @@ private:
 
   bool clearCallback(std_srvs::Empty::Request&, std_srvs::Empty::Response&);
   bool resetCallback(std_srvs::Empty::Request&, std_srvs::Empty::Response&);
-  bool spawnCallback(turtlesim::Spawn::Request&, turtlesim::Spawn::Response&);
-  bool killCallback(turtlesim::Kill::Request&, turtlesim::Kill::Response&);
+  bool spawnCallback(swarm_sim::Spawn::Request&, swarm_sim::Spawn::Response&);
+  bool killCallback(swarm_sim::Kill::Request&, swarm_sim::Kill::Response&);
+  bool betrayCallback(swarm_sim::Betray::Request&, swarm_sim::Betray::Response&);
+  bool listCallback(swarm_sim::SwarmList::Request&, swarm_sim::SwarmList::Response&);
 
   ros::NodeHandle nh_;
   QTimer* update_timer_;
@@ -88,6 +92,9 @@ private:
   ros::ServiceServer reset_srv_;
   ros::ServiceServer spawn_srv_;
   ros::ServiceServer kill_srv_;
+  ros::ServiceServer betray_srv_;
+
+  ros::ServiceServer list_srv_;
 
   typedef std::map<std::string, TurtlePtr> M_Turtle;
   M_Turtle turtles_;

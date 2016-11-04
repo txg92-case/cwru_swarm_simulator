@@ -39,7 +39,7 @@
 #define DEFAULT_BG_G 0x56
 #define DEFAULT_BG_B 0xff
 
-namespace turtlesim
+namespace swarm_sim
 {
 
 TurtleFrame::TurtleFrame(QWidget* parent, Qt::WindowFlags f)
@@ -50,7 +50,7 @@ TurtleFrame::TurtleFrame(QWidget* parent, Qt::WindowFlags f)
 , id_counter_(0)
 {
   setFixedSize(500, 500);
-  setWindowTitle("TurtleSim");
+  setWindowTitle("swarm_sim");
 
   srand(time(NULL));
 
@@ -65,19 +65,10 @@ TurtleFrame::TurtleFrame(QWidget* parent, Qt::WindowFlags f)
   nh_.setParam("background_b", DEFAULT_BG_B);
 
   QVector<QString> turtles;
-  turtles.append("box-turtle.png");
-  turtles.append("robot-turtle.png");
-  turtles.append("sea-turtle.png");
-  turtles.append("diamondback.png");
-  turtles.append("electric.png");
-  turtles.append("fuerte.png");
-  turtles.append("groovy.png");
-  turtles.append("hydro.svg");
-  turtles.append("indigo.svg");
-  turtles.append("jade.png");
-  turtles.append("kinetic.png");
+  turtles.append("sheep.png");
+  turtles.append("wolf.png");
 
-  QString images_path = (ros::package::getPath("turtlesim") + "/images/").c_str();
+  QString images_path = (ros::package::getPath("swarm_sim") + "/images/").c_str();
   for (int i = 0; i < turtles.size(); ++i)
   {
     QImage img;
@@ -93,8 +84,11 @@ TurtleFrame::TurtleFrame(QWidget* parent, Qt::WindowFlags f)
   reset_srv_ = nh_.advertiseService("reset", &TurtleFrame::resetCallback, this);
   spawn_srv_ = nh_.advertiseService("spawn", &TurtleFrame::spawnCallback, this);
   kill_srv_ = nh_.advertiseService("kill", &TurtleFrame::killCallback, this);
+  betray_srv_ = nh_.advertiseService("betray", &TurtleFrame::betrayCallback, this);
 
-  ROS_INFO("Starting turtlesim with node name %s", ros::this_node::getName().c_str()) ;
+  list_srv_ = nh_.advertiseService("list", &TurtleFrame::listCallback, this);
+
+  ROS_INFO("Starting swarm_sim with node name %s", ros::this_node::getName().c_str()) ;
 
   width_in_meters_ = (width() - 1) / meter_;
   height_in_meters_ = (height() - 1) / meter_;
@@ -118,7 +112,7 @@ TurtleFrame::~TurtleFrame()
   delete update_timer_;
 }
 
-bool TurtleFrame::spawnCallback(turtlesim::Spawn::Request& req, turtlesim::Spawn::Response& res)
+bool TurtleFrame::spawnCallback(swarm_sim::Spawn::Request& req, swarm_sim::Spawn::Response& res)
 {
   std::string name = spawnTurtle(req.name, req.x, req.y, req.theta);
   if (name.empty())
@@ -132,7 +126,7 @@ bool TurtleFrame::spawnCallback(turtlesim::Spawn::Request& req, turtlesim::Spawn
   return true;
 }
 
-bool TurtleFrame::killCallback(turtlesim::Kill::Request& req, turtlesim::Kill::Response&)
+bool TurtleFrame::killCallback(swarm_sim::Kill::Request& req, swarm_sim::Kill::Response&)
 {
   M_Turtle::iterator it = turtles_.find(req.name);
   if (it == turtles_.end())
@@ -147,6 +141,38 @@ bool TurtleFrame::killCallback(turtlesim::Kill::Request& req, turtlesim::Kill::R
   return true;
 }
 
+
+bool TurtleFrame::betrayCallback(swarm_sim::Betray::Request& req, swarm_sim::Betray::Response&)
+{
+  M_Turtle::iterator it = turtles_.find(req.name);
+  if (it == turtles_.end())
+  {
+    ROS_ERROR("Tried to make turtle [%s] evil, but it does not exist", req.name.c_str());
+    return false;
+  }
+
+  ROS_INFO("Making turtle [%s] evil",req.name.c_str());
+  turtles_[req.name]->setEvil(true,turtle_images_[1]);
+  update();
+
+  return true;
+}
+
+
+bool TurtleFrame::listCallback(swarm_sim::SwarmList::Request& req, swarm_sim::SwarmList::Response& resp)
+{
+  resp.names.clear();
+  //resp.names.resize(turtles_.size());
+  //M_Turtle::iterator it = turtles_.begin();
+  //M_Turtle::iterator end = turtles_.end();
+  //for (int i(0) ; it != end; ++it, i++)
+  //{
+    // resp.names[i] = turtles_[it]->first;
+  //}
+  return true;
+}
+
+
 bool TurtleFrame::hasTurtle(const std::string& name)
 {
   return turtles_.find(name) != turtles_.end();
@@ -154,7 +180,7 @@ bool TurtleFrame::hasTurtle(const std::string& name)
 
 std::string TurtleFrame::spawnTurtle(const std::string& name, float x, float y, float angle)
 {
-  return spawnTurtle(name, x, y, angle, rand() % turtle_images_.size());
+  return spawnTurtle(name, x, y, angle, 0);
 }
 
 std::string TurtleFrame::spawnTurtle(const std::string& name, float x, float y, float angle, size_t index)
@@ -252,14 +278,14 @@ void TurtleFrame::updateTurtles()
 
 bool TurtleFrame::clearCallback(std_srvs::Empty::Request&, std_srvs::Empty::Response&)
 {
-  ROS_INFO("Clearing turtlesim.");
+  ROS_INFO("Clearing swarm_sim.");
   clear();
   return true;
 }
 
 bool TurtleFrame::resetCallback(std_srvs::Empty::Request&, std_srvs::Empty::Response&)
 {
-  ROS_INFO("Resetting turtlesim.");
+  ROS_INFO("Resetting swarm_sim.");
   turtles_.clear();
   id_counter_ = 0;
   spawnTurtle("", width_in_meters_ / 2.0, height_in_meters_ / 2.0, 0);

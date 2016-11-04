@@ -1,11 +1,11 @@
 #include <boost/bind.hpp>
 #include <ros/ros.h>
-#include <turtlesim/Pose.h>
+#include <swarm_sim/Pose.h>
 #include <geometry_msgs/Twist.h>
 #include <std_srvs/Empty.h>
 
-turtlesim::PoseConstPtr g_pose;
-turtlesim::Pose g_goal;
+swarm_sim::PoseConstPtr g_pose;
+swarm_sim::Pose g_goal;
 
 enum State
 {
@@ -21,7 +21,7 @@ bool g_first_goal_set = false;
 
 #define PI 3.141592
 
-void poseCallback(const turtlesim::PoseConstPtr& pose)
+void poseCallback(const swarm_sim::PoseConstPtr& pose)
 {
   g_pose = pose;
 }

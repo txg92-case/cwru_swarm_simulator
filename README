@@ -1,0 +1,12 @@
+To run a demo, open the following in seperate terminals:
+	roscore
+	rosrun swarm_sim swarm_sim_node
+	rosrun swarm_sim swarm.py
+	rosrun object_tracker secure_state_sim.py
+	rosrun object_tracker map_comparator.py
+	rosrun rviz 
+
+in rviz you can take a look at the compromised and uncompromised particle filters for the robot with the rviz config file. Although the code is written to support multiple robots and multiple observers it is configured to do only one.
+
+Once all that is complete, open a new terminal and type:
+"rosservice call /betray 'turtle2'"

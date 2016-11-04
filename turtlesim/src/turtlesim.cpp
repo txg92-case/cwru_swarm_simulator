@@ -47,7 +47,7 @@ public:
 
   int exec()
   {
-    turtlesim::TurtleFrame frame;
+    swarm_sim::TurtleFrame frame;
     frame.show();
 
     return QApplication::exec();

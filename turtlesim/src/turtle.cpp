@@ -36,7 +36,7 @@
 #define DEFAULT_PEN_G 0xb8
 #define DEFAULT_PEN_B 0xff
 
-namespace turtlesim
+namespace swarm_sim
 {
 
 Turtle::Turtle(const ros::NodeHandle& nh, const QImage& turtle_image, const QPointF& pos, float orient)
@@ -47,6 +47,7 @@ Turtle::Turtle(const ros::NodeHandle& nh, const QImage& turtle_image, const QPoi
 , lin_vel_(0.0)
 , ang_vel_(0.0)
 , pen_on_(true)
+, evil_(false)
 , pen_(QColor(DEFAULT_PEN_R, DEFAULT_PEN_G, DEFAULT_PEN_B))
 {
   pen_.setWidth(3);
@@ -70,7 +71,7 @@ void Turtle::velocityCallback(const geometry_msgs::Twist::ConstPtr& vel)
   ang_vel_ = vel->angular.z;
 }
 
-bool Turtle::setPenCallback(turtlesim::SetPen::Request& req, turtlesim::SetPen::Response&)
+bool Turtle::setPenCallback(swarm_sim::SetPen::Request& req, swarm_sim::SetPen::Response&)
 {
   pen_on_ = !req.off;
   if (req.off)
@@ -88,13 +89,13 @@ bool Turtle::setPenCallback(turtlesim::SetPen::Request& req, turtlesim::SetPen::
   return true;
 }
 
-bool Turtle::teleportRelativeCallback(turtlesim::TeleportRelative::Request& req, turtlesim::TeleportRelative::Response&)
+bool Turtle::teleportRelativeCallback(swarm_sim::TeleportRelative::Request& req, swarm_sim::TeleportRelative::Response&)
 {
   teleport_requests_.push_back(TeleportRequest(0, 0, req.angular, req.linear, true));
   return true;
 }
 
-bool Turtle::teleportAbsoluteCallback(turtlesim::TeleportAbsolute::Request& req, turtlesim::TeleportAbsolute::Response&)
+bool Turtle::teleportAbsoluteCallback(swarm_sim::TeleportAbsolute::Request& req, swarm_sim::TeleportAbsolute::Response&)
 {
   teleport_requests_.push_back(TeleportRequest(req.x, req.y, req.theta, 0, false));
   return true;
@@ -172,6 +173,7 @@ bool Turtle::update(double dt, QPainter& path_painter, const QImage& path_image,
   p.theta = orient_;
   p.linear_velocity = lin_vel_;
   p.angular_velocity = ang_vel_;
+  p.wolf = evil_;
   pose_pub_.publish(p);
 
   // Figure out (and publish) the color underneath the turtle
@@ -210,6 +212,12 @@ void Turtle::paint(QPainter& painter)
   p.rx() -= 0.5 * turtle_rotated_image_.width();
   p.ry() -= 0.5 * turtle_rotated_image_.height();
   painter.drawImage(p, turtle_rotated_image_);
+}
+
+void Turtle::setEvil(bool evil, const QImage& turtle_image)
+{
+  this->evil_ = evil;
+  this->turtle_image_ = turtle_image;
 }
 
 }
