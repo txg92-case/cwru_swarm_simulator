@@ -15,10 +15,10 @@ data, pred_beh 			= 0,1
 bc_interval 			= 1
 
 d_limits				= np.array([[0,10],[0,10],[-np.pi,np.pi]]) 																			#x,y,theta,v_x,v_r limits
-array_size				= 100																													#How many particles we want
+array_size				= 100																												#How many particles we want
 
-R						= np.array([[.1,.001,.001],[.001,.1,.001],[.001,.001,.1]])															#Motion model noise
-Q						= np.array([[.5,.01,.02],[.01,.5,.02],[.01,.01,.2]])																	#Measurement noise
+R						= np.array([[1,.001],[.001,.1]])																					#Motion model noise
+Q						= np.array([[2,.01,.02],[.01,2,.02],[.01,.01,.4]])																	#Measurement noise
 
 PROB_SWITCH 			= .3
 CIRC_CENTER 			= [6,6]
@@ -33,8 +33,13 @@ FRAME_ID 				= "map"
 '''
 Changes state based on the behv given
 '''
-def g_func(tmp_state, behv, dt, R = None):
+def g_func(tmp_state, behv_tmp, dt, R = None):
 	state 		= tmp_state[:]
+
+	if R is not None:
+		behv			= np.diag(gauss(behv_tmp, R)).copy()
+	else:
+		behv 			= behv_tmp
 
 	if behv[v_th] != 0:
 		state[x] 		= state[x] - (behv[v_x] / behv[v_th]) * np.sin(state[th]) + (behv[v_x] / behv[v_th]) * np.sin(state[th] + behv[v_th] * dt)
@@ -46,8 +51,7 @@ def g_func(tmp_state, behv, dt, R = None):
 		state[y] 		= state[y] + np.sin(state[th]) * dt * behv[v_x]
 		state[th] 		= state[th]
 
-	if R is not None:
-		state			= np.diag(gauss(state, R)).copy()
+
 
 	state[th] 			= rot_diff(state[th])
 

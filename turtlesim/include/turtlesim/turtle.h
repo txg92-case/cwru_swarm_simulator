@@ -47,6 +47,7 @@
 #include <QPainter>
 #include <QPen>
 #include <QPointF>
+#include <random>
 
 #define PI 3.14159265
 
@@ -87,6 +88,7 @@ private:
 
   ros::Subscriber velocity_sub_;
   ros::Publisher pose_pub_;
+  ros::Publisher pose_pub_noisy_;
   ros::Publisher color_pub_;
   ros::ServiceServer set_pen_srv_;
   ros::ServiceServer teleport_relative_srv_;
@@ -95,6 +97,8 @@ private:
   ros::WallTime last_command_time_;
 
   float meter_;
+  std::default_random_engine generator;
+  std::normal_distribution<float> nd_l,nd_r, nd_rd_l, nd_rd_r, nd_rv_l, nd_rv_r;
 
   struct TeleportRequest
   {

@@ -22,8 +22,11 @@ class sec_state_trk:
 	def __init__ (self, turtle_List, ID_List):
 		for i in range(len(turtle_List)):
 			rospy.Subscriber(turtle_List[i] + "/pose", Pose, self.sns_callback)
+			rospy.Subscriber(turtle_List[i] + "/pose_noisy", Pose, self.sns_callback_noisy)
+			self.truth_pub 		= rospy.Publisher(ID_List[i] + "/truthOdom", Odometry, queue_size=1)
 			self.sec_state_pub 	= rospy.Publisher(ID_List[i] + "/noisedOdom", Odometry, queue_size=1)
 			self.odom_msg 		= Odometry()
+			self.odom_msg_nd 	= Odometry()
 
 	def sns_callback(self, point):
 		#TODO: add noise
@@ -39,8 +42,22 @@ class sec_state_trk:
 		self.odom_msg.pose.pose.orientation.w 	= quat[3]
 		self.odom_msg.header.frame_id 			= FRAME_ID
 
-		self.sec_state_pub.publish(self.odom_msg)
+		self.truth_pub.publish(self.odom_msg)
 
+	def sns_callback_noisy(self, point):
+		x_p, y_p, th_p 								= point.x,point.y,point.theta
+
+		self.odom_msg_nd.pose.pose.position.x 		= x_p
+		self.odom_msg_nd.pose.pose.position.y  		= y_p
+
+		quat = get_quat(0,0,th_p)
+		self.odom_msg_nd.pose.pose.orientation.x 	= quat[0]
+		self.odom_msg_nd.pose.pose.orientation.y 	= quat[1]
+		self.odom_msg_nd.pose.pose.orientation.z 	= quat[2]
+		self.odom_msg_nd.pose.pose.orientation.w 	= quat[3]
+		self.odom_msg_nd.header.frame_id 			= FRAME_ID
+
+		self.sec_state_pub.publish(self.odom_msg_nd)
 
 def main(turtle_List,ID_List):
 	sec_state_trk(turtle_List,ID_List)

@@ -2,7 +2,6 @@ To run a demo, open the following in seperate terminals:
 	roscore
 	rosrun swarm_sim swarm_sim_node
 	rosrun swarm_sim swarm.py
-	rosrun object_tracker secure_state_sim.py
 	rosrun object_tracker map_comparator.py
 	rosrun rviz 
 
